@@ -24,3 +24,6 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown 
+Depends: 
+    R (>= 3.5)
+LazyData: true
