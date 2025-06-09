@@ -16,9 +16,9 @@ construct_trajectory <- function(object, start_cell_type) {
     stop("Error: object must be a list.")
   }
   
-  required_elements <- c("expression_matrix", "cell_metadata", "gene_metadata")
+  required_elements <- c("expression_matrix", "cell_metadata", "feature_metadata")
   if (!all(required_elements %in% names(object))) {
-    stop("Error: object must contain 'expression_matrix', 'cell_metadata', and 'gene_metadata'.")
+    stop("Error: object must contain 'expression_matrix', 'cell_metadata', and 'feature_metadata'.")
   }
   
   if (!is.character(start_cell_type) || length(start_cell_type) != 1) {
@@ -47,13 +47,13 @@ construct_trajectory <- function(object, start_cell_type) {
 
   expression_matrix <- object$expression_matrix
   cell_metadata <- object$cell_metadata
-  gene_metadata <- object$gene_metadata
+  feature_metadata <- object$feature_metadata
 
   # Create monocle3 object with error handling
   cds <- tryCatch({
     monocle3::new_cell_data_set(expression_matrix, 
                                cell_metadata = cell_metadata, 
-                               gene_metadata = gene_metadata)
+                               feature_metadata = feature_metadata)
   }, error = function(e) {
     stop("Error creating cell_data_set: ", e$message)
   })
