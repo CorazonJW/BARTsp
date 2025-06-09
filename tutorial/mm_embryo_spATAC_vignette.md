@@ -31,8 +31,7 @@ obj <- prepare_input(expression_matrix, cell_metadata, feature_metadata, spatial
 # 3. Compute trajectory and obtain DEGs along pseudo-time
 
 ```{r, echo=TRUE, results='markup'}
-cds <- construct_trajectory(obj, "Radial glia")
-pseudotime_values <- monocle3::pseudotime(cds)
+pseudotime_values <- E13_sp$spATAC_traj
 
 traj_DAR <- get_traj_features(pseudotime_values, obj, pval_cutoff = 0.1, 
                               cor_cutoff_pos = 1, cor_cutoff_neg = -0.2216)
