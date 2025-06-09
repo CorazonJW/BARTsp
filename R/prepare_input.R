@@ -35,7 +35,7 @@ prepare_input <- function(expression_matrix, cell_metadata, feature_name, spatia
   }
   
   if (!is.data.frame(feature_name)) {
-    stop("Error: gene_metadata (feature_name) must be a data frame.")
+    stop("Error: feature_metadata must be a data frame.")
   }
 
   if (!is.data.frame(spatial_coordinates)) {
