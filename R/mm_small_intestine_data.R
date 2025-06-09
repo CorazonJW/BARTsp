@@ -14,7 +14,7 @@
 #' @source \url{https://www.10xgenomics.com/datasets/visium-hd-cytassist-gene-expression-libraries-of-mouse-intestine}
 #'
 #' @examples
-#' data(subset_object_with_ct_label)
+#' data(mm_small_intestine_data)
 #' # View cell type distribution
-#' table(subset_object_with_ct_label$enterocyte_type)
+#' table(mm_small_intestine_data$enterocyte_type)
 "mm_small_intestine_data" 
