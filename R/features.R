@@ -23,9 +23,9 @@ get_sig_features_geneset <- function(traj_feature, sp_feature) {
     stop("Error: traj_feature must contain 'significant_features' and 'correlation_rho'.")
   }
   
-  required_sp_elements <- c("significant_features", "Deviation_from_expectation")
+  required_sp_elements <- c("significant_features")
   if (!all(required_sp_elements %in% names(sp_feature))) {
-    stop("Error: sp_feature must contain 'significant_features' and 'Deviation_from_expectation'.")
+    stop("Error: sp_feature must contain 'significant_features'.")
   }
   
   if (length(traj_feature$significant_features) == 0) {
@@ -42,13 +42,6 @@ get_sig_features_geneset <- function(traj_feature, sp_feature) {
     valid_idx <- !is.na(traj_feature$correlation_rho)
     traj_feature$significant_features <- traj_feature$significant_features[valid_idx]
     traj_feature$correlation_rho <- traj_feature$correlation_rho[valid_idx]
-  }
-  
-  if (any(is.na(sp_feature$Deviation_from_expectation))) {
-    warning("NA values found in Deviation_from_expectation. These will be removed.")
-    valid_idx <- !is.na(sp_feature$Deviation_from_expectation)
-    sp_feature$significant_features <- sp_feature$significant_features[valid_idx]
-    sp_feature$Deviation_from_expectation <- sp_feature$Deviation_from_expectation[valid_idx]
   }
 
   # Find overlapping features
@@ -68,20 +61,34 @@ get_sig_features_geneset <- function(traj_feature, sp_feature) {
   cor_rho <- traj_feature$correlation_rho[indices_traj]
 
   indices_sp <- match(overall_feature, sp_feature$significant_features)
-  feature_moranI <- sp_feature$Deviation_from_expectation[indices_sp]
+  
+  # Check which statistics are available in sp_feature
+  if ("Deviation_from_expectation" %in% names(sp_feature)) {
+    feature_stat <- sp_feature$Deviation_from_expectation[indices_sp]
+    stat_name <- "moransI"
+  } else if ("importance_score" %in% names(sp_feature)) {
+    feature_stat <- sp_feature$importance_score[indices_sp]
+    stat_name <- "importance_score"
+  } else {
+    feature_stat <- traj_feature$correlation_rho[indices_traj]
+    stat_name <- "correlation_with_pseudotime"
+  }  
 
   # Create and sort results
   dt <- data.frame(
     sig_feature = overall_feature,
-    moransI = feature_moranI,
+    statistics = feature_stat,
     cor.rho = cor_rho
   )
   
-  dt <- dt[order(-dt$moransI), ]
+  # Rename the statistics column based on the type
+  names(dt)[names(dt) == "statistics"] <- stat_name
+  
+  dt <- dt[order(-dt[[stat_name]]), ]
   
   return(list(
     significant_features = dt$sig_feature,
-    statistics = dt$moransI,
+    statistics = dt[[stat_name]],
     cor.rho = dt$cor.rho
   ))
 }

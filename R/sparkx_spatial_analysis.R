@@ -155,5 +155,5 @@ get_sparkx_DEGs <- function(spark_obj, cutoff) {
     warning("No significant genes found at the specified cutoff.")
   }
 
-  return(significant_genes)
+  return(list(significant_features = significant_genes))
 } 
