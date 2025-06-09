@@ -38,7 +38,7 @@ prepare_moran_input <- function(object) {
     stop("Error: cell_metadata must contain 'cell_type' column.")
   }
 
-  expression_matrix <- object$expression_matrix
+  expression_matrix <- as.matrix(object$expression_matrix)
   spatial_coordinates <- object$spatial_coordinates
   cell_type_matrix <- data.frame(cell = rownames(object$cell_metadata), cell_type = object$cell_metadata$cell_type)
 
@@ -264,19 +264,6 @@ get_moran_result <- function(morana_I_result, adj.val, moransI) {
   
   if (!is.numeric(moransI)) {
     stop("Error: moransI must be a numeric value.")
-  }
-
-  # Check structure of results
-  valid_results <- sapply(morana_I_result, function(x) {
-    !is.null(x) && 
-    is.list(x) && 
-    "estimate" %in% names(x) && 
-    length(x$estimate) >= 2 &&
-    "adjusted_p.value" %in% names(x)
-  })
-
-  if (!any(valid_results)) {
-    stop("Error: No valid Moran's I results found.")
   }
 
   # Filter results
