@@ -1,0 +1,26 @@
+Package: BARTsp
+Title: Binding Analysis for Regulation of Transcription (BART) for spatial transcriptomics and epigenomics data
+Version: 0.1.0
+Authors@R: 
+    person("Jingyi", "Wang", email = "your.email@example.com", role = c("aut", "cre"))
+Description: A package for analyzing spatial transcriptomics/epigenomics data with BART integration. It provides tools for identifying spatially variable genes, constructing trajectories, and predicting transcription factor.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+    monocle3,
+    SPARK,
+    spdep,
+    dplyr,
+    magrittr,
+    ggplot2,
+    ggrepel,
+    BARTsc,
+    stats,
+    igraph,
+    SummarizedExperiment
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown 
