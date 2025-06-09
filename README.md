@@ -59,7 +59,7 @@ sparkx_result <- run_SPARKX(input_data, numCores = 4)
 sp_DEG <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
 
 # (Alternative) Run spatial analysis (KNN)
-knn_result <- run_knn_spatial(input_data, k = 5, method = "correlation", cutoff = NULL)
+knn_result <- run_knn_spatial(input_data, k = 5, method = "correlation", cutoff = 0.5)
 
 # Construct BART input
 genes <- get_sig_features_geneset(traj_DEG, sp_DEG)

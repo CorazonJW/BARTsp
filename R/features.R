@@ -66,9 +66,9 @@ get_sig_features_geneset <- function(traj_feature, sp_feature) {
   if ("Deviation_from_expectation" %in% names(sp_feature)) {
     feature_stat <- sp_feature$Deviation_from_expectation[indices_sp]
     stat_name <- "moransI"
-  } else if ("importance_score" %in% names(sp_feature)) {
-    feature_stat <- sp_feature$importance_score[indices_sp]
-    stat_name <- "importance_score"
+  } else if ("importance_scores" %in% names(sp_feature)) {
+    feature_stat <- sp_feature$importance_scores[indices_sp]
+    stat_name <- "importance_scores"
   } else {
     feature_stat <- traj_feature$correlation_rho[indices_traj]
     stat_name <- "correlation_with_pseudotime"

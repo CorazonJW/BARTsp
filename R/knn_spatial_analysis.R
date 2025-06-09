@@ -237,7 +237,7 @@ run_knn_spatial <- function(object, k = 5, method = "correlation", cutoff = NULL
   }
   
   return(list(
-    significant_genes = significant_genes,
+    significant_features = significant_genes,
     importance_scores = importance_scores$importance_score
   ))
 } 
