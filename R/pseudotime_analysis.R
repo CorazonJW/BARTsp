@@ -53,7 +53,7 @@ construct_trajectory <- function(object, start_cell_type) {
   cds <- tryCatch({
     monocle3::new_cell_data_set(expression_matrix, 
                                cell_metadata = cell_metadata, 
-                               feature_metadata = feature_metadata)
+                               gene_metadata = feature_metadata)
   }, error = function(e) {
     stop("Error creating cell_data_set: ", e$message)
   })
