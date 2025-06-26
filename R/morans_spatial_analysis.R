@@ -22,10 +22,6 @@ prepare_moran_input <- function(object) {
     stop("Error: object must contain 'expression_matrix', 'spatial_coordinates', and 'cell_metadata'.")
   }
   
-  if (!is.matrix(object$expression_matrix) && !is.data.frame(object$expression_matrix)) {
-    stop("Error: expression_matrix must be a matrix or data frame.")
-  }
-  
   if (!is.data.frame(object$spatial_coordinates)) {
     stop("Error: spatial_coordinates must be a data frame.")
   }
