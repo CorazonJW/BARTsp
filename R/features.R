@@ -215,10 +215,20 @@ get_sig_features_region <- function(obj, traj_feature, sp_feature) {
   traj_unique_features_pos <- traj_pos_features[!traj_pos_features %in% overlap_features_pos]
   sp_unique_features_pos <- sp_sig_feature[!sp_sig_feature %in% overlap_features_pos]
 
+  if (length(overlap_features_pos) < 50) {
+  warning(paste0("Only ", length(overlap_features_pos), 
+                 " overlapping features found in downstream direction. Prediction results may not be reliable."))
+  }
+
   traj_neg_features <- dt_traj_sig_feature_neg$feature
   overlap_features_neg <- intersect(traj_neg_features, sp_sig_feature)
   traj_unique_features_neg <- traj_neg_features[!traj_neg_features %in% overlap_features_neg]
   sp_unique_features_neg <- sp_sig_feature[!sp_sig_feature %in% overlap_features_neg]
+
+  if (length(overlap_features_neg) < 50) {
+  warning(paste0("Only ", length(overlap_features_neg), 
+                 " overlapping features found in upstream direction. Prediction results may not be reliable."))
+  }
 
   # Rank aggregation with error handling
   tryCatch({

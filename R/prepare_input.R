@@ -15,9 +15,9 @@
 #' \item{spatial_coordinates}{Spatial coordinates of selected cells}
 #' 
 #' @export
-prepare_input <- function(expression_matrix, cell_metadata, feature_name, spatial_coordinates, cell_types) {
+prepare_input <- function(expression_matrix, cell_metadata, spatial_coordinates, cell_types) {
   # Input validation
-  if (missing(expression_matrix) || missing(cell_metadata) || missing(feature_name) || 
+  if (missing(expression_matrix) || missing(cell_metadata) || 
       missing(spatial_coordinates) || missing(cell_types)) {
     stop("Error: All arguments are required.")
   }
@@ -32,10 +32,6 @@ prepare_input <- function(expression_matrix, cell_metadata, feature_name, spatia
   
   if (!("cell_type" %in% colnames(cell_metadata))) {
     stop("Error: cell_metadata must contain a 'cell_type' column.")
-  }
-  
-  if (!is.data.frame(feature_name)) {
-    stop("Error: feature_metadata must be a data frame.")
   }
 
   if (!is.data.frame(spatial_coordinates)) {
@@ -139,6 +135,8 @@ prepare_input <- function(expression_matrix, cell_metadata, feature_name, spatia
     expression_mat <- expression_mat[!zero_var_genes, , drop = FALSE]
   }
   
+  feature_name <- data.frame(gene_short_name = rownames(expression_mat), row.names = rownames(expression_mat))
+
   # Construct and return object
   object <- list(
     expression_matrix = expression_mat,
