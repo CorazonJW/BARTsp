@@ -89,3 +89,15 @@ plot_BART_results(results_geneset_up, TF_of_interest, 0.05, 6)
 # TFs at downstream
 plot_BART_results(results_geneset_up, TF_of_interest, 0.05, 6)
 ```
+
+# 8. Integrate BART predicted results
+
+```{r, echo=TRUE, results='markup', fig.width=10, fig.height=8}
+dt <- integrate_bart_result(results_geneset_up, results_geneset_down, cutoff_up = 0.05, cutoff_down = 0.05)
+
+# Visualize integrated ranks of all TFs
+# This function shows the top n active at upstream and downstream
+plot_integration_bar(dt, top_n = 10)
+# This function demonstrates all TFs and highlights user-defined TFs of interst
+plot_integration_dot <- (dt, tf_highlight = TF_of_interest)
+```

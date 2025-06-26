@@ -30,11 +30,10 @@ expression_matrix <- seu_object@assays$Spatial.008um@layers$counts
 colnames(expression_matrix) <- rownames(seu_object@assays$Spatial.008um@cells)
 rownames(expression_matrix) <- rownames(seu_object@assays$Spatial.008um@features)
 cell_metadata <- seu_object@meta.data # cell_metadata must contain a column named "Cell_type"
-feature_metadata <- data.frame(gene_short_name = rownames(expression_matrix), row.names = rownames(expression_matrix))
 spatial_coordinates <- GetTissueCoordinates(seu_object)
 
 # Prepare input data
-input_data <- prepare_input(expression_matrix, cell_metadata, feature_name, spatial_coordinates, cell_types)
+input_data <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types)
 
 # Run trajectory analysis
 trajectory <- construct_trajectory(input_data, start_cell_type = "cell_type_A")
@@ -72,6 +71,12 @@ results <- get_BART_results(bart_proj)
 
 # Visualize results
 plot_BART_results(results, TF_of_interest = c("TF1", "TF2"), cutoff = 0.1)
+
+# Integrate BART predicted results
+dt <- integrate_bart_result(results_geneset_up, results_geneset_down, cutoff_up = 0.05, cutoff_down = 0.05)
+
+plot_integration_bar(dt, top_n = 10)
+plot_integration_dot <- (dt, tf_highlight = TF_of_interest)
 ```
 
 ## Documentation
