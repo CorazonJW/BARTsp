@@ -127,28 +127,40 @@ plot_integration_bar <- function(dt, top_n = 10) {
 #'
 #' @return A `ggplot2` object showing the dot plot with highlighted TFs.
 #' @export
-plot_integration_dot <- function(dt, tf_highlight = tf_interest) {
+plot_integration_dot <- function(dt, tf_highlight = NULL) {
 
-  if (!is.data.frame(dt) || !all(c("TF", "rank_score") %in% colnames(dt))) {
+  if (!is.data.frame(dt) || !all(c("TF", "rank_score") %in% names(dt))) {
     stop("Error: Input must be a data frame with columns 'TF' and 'rank_score'.")
   }
-
-  if (!is.character(tf_highlight)) {
-    stop("Error: tf_highlight must be a character vector of TF names.")
+  if (!is.null(tf_highlight) && !is.character(tf_highlight)) {
+    stop("Error: tf_highlight must be a character vector or NULL.")
   }
 
-  dt <- dt %>% arrange(rank_score) %>% distinct(TF, .keep_all = TRUE)
-  dt$TF_ordered <- factor(dt$TF, levels = rev(dt$TF))
-  dt$highlight <- dt$TF %in% tf_highlight
-  dt$color <- ifelse(dt$highlight, "highlight", ifelse(dt$rank_score >= 0, "positive", "negative"))
+  dt <- as.data.frame(dt, stringsAsFactors = FALSE)
+  dt <- dt[order(dt$rank_score), , drop = FALSE]
+  dt <- dt[!duplicated(dt$TF), , drop = FALSE]
 
-  ggplot() +
-    geom_point(data = dt, aes(x = TF_ordered, y = rank_score, color = color), size = 2) +
-    geom_point(data = dt %>% dplyr::filter(highlight), aes(x = TF_ordered, y = rank_score), color = "#E41A1C", size = 2) +
-    ggrepel::geom_label_repel(data = dt %>% dplyr::filter(highlight),
-                              aes(x = TF_ordered, y = rank_score, label = TF),
-                              size = 3, color = "black", fill = "white", box.padding = 0.3, max.overlaps = Inf) +
-    scale_color_manual(values = c("positive" = "#E3B251", "negative" = "#994C00", "highlight" = "#E41A1C")) +
+  # order for x-axis (lowest at bottom, highest at top)
+  dt$TF_ordered <- factor(dt$TF, levels = rev(dt$TF))
+
+  # safe highlight vector (only TFs that exist in dt)
+  if (is.null(tf_highlight)) tf_highlight <- character(0)
+  tf_highlight <- intersect(tf_highlight, dt$TF)
+
+  dt$highlight <- dt$TF %in% tf_highlight
+  dt$color <- ifelse(dt$highlight, "highlight",
+                     ifelse(dt$rank_score >= 0, "positive", "negative"))
+
+  # make a clean highlight df; may be 0-row (that's fine)
+  dt_hi <- subset(dt, highlight, select = c("TF","rank_score","TF_ordered"))
+
+  p <- ggplot() +
+    geom_point(data = dt,
+               aes(x = TF_ordered, y = rank_score, color = color),
+               size = 2) +
+    scale_color_manual(values = c(positive = "#E3B251",
+                                  negative = "#994C00",
+                                  highlight = "#E41A1C")) +
     ylim(-1, 1) +
     coord_cartesian(clip = "off") +
     theme_bw() +
@@ -161,4 +173,20 @@ plot_integration_dot <- function(dt, tf_highlight = tf_interest) {
           panel.grid.minor.x = element_blank(),
           panel.grid.major.y = element_blank(),
           panel.grid.minor.y = element_blank())
+
+  # add highlight layers only if present
+  if (nrow(dt_hi) > 0) {
+    p <- p +
+      geom_point(data = dt_hi,
+                 aes(x = TF_ordered, y = rank_score),
+                 color = "#E41A1C", size = 2) +
+      ggrepel::geom_label_repel(
+        data = dt_hi,
+        aes(x = TF_ordered, y = rank_score, label = TF),
+        size = 3, color = "black", fill = "white",
+        box.padding = 0.3, max.overlaps = Inf
+      )
+  }
+
+  p
 }
