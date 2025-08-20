@@ -144,8 +144,8 @@ plot_integration_dot <- function(dt, tf_highlight = tf_interest) {
 
   ggplot() +
     geom_point(data = dt, aes(x = TF_ordered, y = rank_score, color = color), size = 2) +
-    geom_point(data = dt %>% filter(dt$highlight), aes(x = TF_ordered, y = rank_score), color = "#E41A1C", size = 2) +
-    ggrepel::geom_label_repel(data = dt %>% filter(dt$highlight),
+    geom_point(data = dt %>% dplyr::filter(highlight), aes(x = TF_ordered, y = rank_score), color = "#E41A1C", size = 2) +
+    ggrepel::geom_label_repel(data = dt %>% dplyr::filter(highlight),
                               aes(x = TF_ordered, y = rank_score, label = TF),
                               size = 3, color = "black", fill = "white", box.padding = 0.3, max.overlaps = Inf) +
     scale_color_manual(values = c("positive" = "#E3B251", "negative" = "#994C00", "highlight" = "#E41A1C")) +
