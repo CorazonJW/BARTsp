@@ -140,15 +140,30 @@ plot_integration_dot <- function(dt, tf_highlight = tf_interest) {
   dt <- dt %>% arrange(rank_score) %>% distinct(TF, .keep_all = TRUE)
   dt$TF_ordered <- factor(dt$TF, levels = rev(dt$TF))
   dt$highlight <- dt$TF %in% tf_highlight
-  dt$color <- ifelse(dt$highlight, "highlight", ifelse(dt$rank_score >= 0, "positive", "negative"))
+  dt$color <- ifelse(dt$highlight, "highlight",
+                     ifelse(dt$rank_score >= 0, "positive", "negative"))
 
   ggplot() +
-    geom_point(data = dt, aes(x = TF_ordered, y = rank_score, color = color), size = 2) +
-    geom_point(data = dt %>% filter(highlight), aes(x = TF_ordered, y = rank_score), color = "#E41A1C", size = 2) +
-    ggrepel::geom_label_repel(data = dt %>% filter(highlight),
-                              aes(x = TF_ordered, y = rank_score, label = TF),
-                              size = 3, color = "black", fill = "white", box.padding = 0.3, max.overlaps = Inf) +
-    scale_color_manual(values = c("positive" = "#E3B251", "negative" = "#994C00", "highlight" = "#E41A1C")) +
+    # all points
+    geom_point(data = dt,
+               aes(x = TF_ordered, y = rank_score, color = color),
+               size = 2) +
+    # highlight points (fixed red color)
+    geom_point(data = dt %>% filter(highlight),
+               aes(x = TF_ordered, y = rank_score),
+               color = "#E41A1C", size = 2) +
+    # highlight labels
+    ggrepel::geom_label_repel(
+      data = dt %>% filter(highlight),
+      aes(x = TF_ordered, y = rank_score, label = TF),
+      size = 3, color = "black", fill = "white",
+      box.padding = 0.3, max.overlaps = Inf
+    ) +
+    scale_color_manual(values = c(
+      "positive"  = "#E3B251",
+      "negative"  = "#994C00",
+      "highlight" = "#E41A1C"
+    )) +
     ylim(-1, 1) +
     coord_cartesian(clip = "off") +
     theme_bw() +
