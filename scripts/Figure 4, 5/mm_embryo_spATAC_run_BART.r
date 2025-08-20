@@ -20,7 +20,7 @@ spatial_coordinates <- data.frame(E13_sp@images$slice1@coordinates)
 spatial_coordinates$x <- spatial_coordinates$imagerow
 spatial_coordinates$y <- spatial_coordinates$imagecol
 
-obj <- prepare_input(expression_matrix, cell_metadata, feature_metadata, spatial_coordinates, c("Radial glia", "Postmitotic premature neurons"))
+obj <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, c("Radial glia", "Postmitotic premature neurons"))
 
 
 ##### 2. Pseudo-time analysis (calculate TVFs)

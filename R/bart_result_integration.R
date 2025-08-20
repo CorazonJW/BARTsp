@@ -99,7 +99,7 @@ plot_integration_bar <- function(dt, top_n = 10) {
 
   ggplot(dt_plot, aes(x = reorder(TF, rank_score), y = rank_score, fill = color)) +
     geom_bar(stat = "identity") +
-    scale_fill_manual(values = c("positive" = "#FA7E7A", "negative" = "#4EA72E")) +
+    scale_fill_manual(values = c("positive" = "#E3B251", "negative" = "#994C00")) +
     ylim(-1, 1) +
     theme_bw() +
     geom_vline(xintercept = top_n + 0.5, linetype = "dotted", color = "grey", linewidth = 1) +
@@ -146,7 +146,7 @@ plot_integration_dot <- function(dt, tf_highlight = tf_interest) {
     ggrepel::geom_label_repel(data = dt %>% filter(highlight),
                               aes(x = TF_ordered, y = rank_score, label = TF),
                               size = 3, color = "black", fill = "white", box.padding = 0.3, max.overlaps = Inf) +
-    scale_color_manual(values = c("positive" = "#FA7E7A", "negative" = "#4EA72E", "highlight" = "#E41A1C")) +
+    scale_color_manual(values = c("positive" = "#E3B251", "negative" = "#994C00", "highlight" = "#E41A1C")) +
     ylim(-1, 1) +
     coord_cartesian(clip = "off") +
     theme_bw() +
