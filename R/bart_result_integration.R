@@ -95,9 +95,11 @@ plot_integration_bar <- function(dt, top_n = 10) {
   dt_bottom <- dt %>% arrange(rank_score) %>% slice(1:top_n)
 
   dt_plot <- bind_rows(dt_top, dt_bottom) %>%
-    mutate(color = ifelse(rank_score >= 0, "positive", "negative"))
+    mutate(color = ifelse(rank_score >= 0, "positive", "negative")) %>%
+    arrange(desc(color), desc(rank_score)) %>%
+    mutate(TF = factor(TF, levels = unique(TF)))
 
-  ggplot(dt_plot, aes(x = reorder(TF, rank_score), y = rank_score, fill = color)) +
+  ggplot(dt_plot, aes(x = TF, y = rank_score, fill = color)) +
     geom_bar(stat = "identity") +
     scale_fill_manual(values = c("positive" = "#E3B251", "negative" = "#994C00")) +
     ylim(-1, 1) +
