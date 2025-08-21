@@ -390,12 +390,14 @@ plot_BART_results <- function(BART_results, TF_of_interest = NULL, cutoff = 0.1,
                  aes(x = rank, y = -log10(rank_avg_z_p_a_irwinhall_pvalue)), 
                  color = "red", size = 1.5) +
       ggrepel::geom_label_repel(data = dt %>% dplyr::filter(TF %in% label_TFs), 
-                               aes(label = TF), size = 2.5, box.padding = 0.05, 
-                               max.overlaps = 25) +
+                               aes(label = TF), family = "Arial", 
+                               size = 2.5, box.padding = 0.05, max.overlaps = 25) +
       geom_hline(yintercept = y_intercept, linetype = "dashed", linewidth = 0.5) +
       labs(x = "TF Rank", y = "-log10(p-value)", title = "") +
       theme_bw() + 
-      theme(panel.grid.major.x = element_blank(), 
+      theme(axis.text = element_text(size = 12, face = "bold", family = "Arial"),
+            axis.title = element_text(size = 14, face = "bold", family = "Arial"), 
+            panel.grid.major.x = element_blank(), 
             panel.grid.minor.x = element_blank(), 
             panel.grid.major.y = element_blank(), 
             panel.grid.minor.y = element_blank())
