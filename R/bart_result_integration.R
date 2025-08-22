@@ -106,9 +106,9 @@ plot_integration_bar <- function(dt, top_n = 10) {
     theme_bw() +
     geom_vline(xintercept = top_n + 0.5, linetype = "dotted", color = "grey", linewidth = 1) +
     labs(x = NULL, y = "Rank Score") +
-    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
-          axis.text.y = element_text(size = 10),
-          axis.title.y = element_text(size = 12),
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1, family = "Arial"),
+          axis.text.y = element_text(size = 10, family = "Arial"),
+          axis.title.y = element_text(size = 12, face = "bold", family = "Arial"),
           legend.position = "none",
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank(),
@@ -166,8 +166,8 @@ plot_integration_dot <- function(dt, tf_highlight = NULL) {
     theme_bw() +
     labs(x = NULL, y = "Rank Score") +
     theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
-          axis.text.y = element_text(size = 10),
-          axis.title.y = element_text(size = 12),
+          axis.text.y = element_text(size = 12, family = "Arial"),
+          axis.title.y = element_text(size = 16, face = "bold", family = "Arial"),
           legend.position = "none",
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank(),

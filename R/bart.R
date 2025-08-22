@@ -395,8 +395,8 @@ plot_BART_results <- function(BART_results, TF_of_interest = NULL, cutoff = 0.1,
       geom_hline(yintercept = y_intercept, linetype = "dashed", linewidth = 0.5) +
       labs(x = "TF Rank", y = "-log10(p-value)", title = "") +
       theme_bw() + 
-      theme(axis.text = element_text(size = 12, face = "bold", family = "Arial"),
-            axis.title = element_text(size = 14, face = "bold", family = "Arial"), 
+      theme(axis.text = element_text(size = 10, family = "Arial"),
+            axis.title = element_text(size = 12, face = "bold", family = "Arial"), 
             panel.grid.major.x = element_blank(), 
             panel.grid.minor.x = element_blank(), 
             panel.grid.major.y = element_blank(), 
