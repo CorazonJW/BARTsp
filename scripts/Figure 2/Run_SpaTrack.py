@@ -9,19 +9,19 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 sc.settings.verbosity = 0
-plt.rcParams['figure.dpi'] = 200
+plt.rcParams['figure.dpi'] = 600
+
+
 
 ##### 1. Prepare inputs
 # Expression matrix
 adata = sc.read_text("~/data/expression_matrix.txt")
 adata_all = adata.transpose().copy()
 adata_all.obs_names = adata_all.obs_names.str.replace(r"\.", "-", regex=True)
-
 # Metadata  
 df_annot = pd.read_csv("~/data/cell_metadata.csv", index_col=0)
 common_barcodes = adata_all.obs_names.intersection(df_annot.index)
 adata_all.obs.loc[common_barcodes, "cell_type"] = df_annot.loc[common_barcodes, "cell_type"]
-
 # Spatial coordinates
 spatial_coords = pd.read_csv("~/data/spatial_coordinates.csv", index_col=0)
 spatial_coords = spatial_coords.reset_index().rename(columns={"index": "barcode"})
@@ -41,6 +41,8 @@ sc.pp.normalize_total(adata_sub, target_sum=1e4)
 sc.pp.log1p(adata_sub)
 sc.pp.calculate_qc_metrics(adata_sub, percent_top=None, log1p=False, inplace=True)
 
+
+
 ##### 2. Construct trajectory
 start_cells = spt.set_start_cells(adata_sub, select_way='cell_type', cell_type='core')
 adata_sub.obsp["trans"] = spt.get_ot_matrix(adata_sub, data_type="spatial", alpha1=0.6, alpha2=0.4)
@@ -54,7 +56,8 @@ if len(fig.axes) > 1:
     fig.delaxes(fig.axes[1])
 axs.xaxis.set_major_locator(ticker.MultipleLocator(500))
 axs.yaxis.set_major_locator(ticker.MultipleLocator(500))
-plt.savefig("~/results/spaTrack_ptime_spatial_plot.png", dpi=300, bbox_inches='tight')
+plt.savefig("~/results/spaTrack_ptime_spatial_plot.png", dpi=600, bbox_inches='tight')
+
 
 
 ##### 3. Predict trajectory-related genes
@@ -100,51 +103,4 @@ gr.get_dataloader()
 
 gr.run()
 gr.network_df
-gr.network_df.to_csv('~/results/spatrack_TF_prediction_spatrack_TF_decrease.csv')
-
-
-##### 5. Check SpaTrack prediction performance
-'''
-# Continue in R
-# Check whether identify known functional TFs
-spatrack_result <- read.csv("~/results/spatrack_TF_prediction_spatrack_TF_decrease.csv")
-
-spatrack_result$rank <- seq_len(nrow(spatrack_result))
-
-sig_result <- spatrack_result %>% filter(weight > cutoff)
-tf_interest <- c("GRHL3", "TCF4", 
-                 "TP63", "GRHL2", "SOX2", "KLF4", "TP73", 
-                 "SNAI2", "ZEB1",  "FOSL1", "STAT3", 
-                 "FOS", "JUN", "JUND", "TP53")
-
-sig_TF <- sig_result %>% filter(TF %in% tf_interest)
-
-
-# Check the rank difference between functional and other TFs
-library(stringr)
-library(ggsignif)
-library(ggplot2)
-spatrack_result$TF_type <- ifelse(spatrack_result$TF %in% tf_interest, "functional", "not_functional")
-spatrack_result$TF_type <- factor(spatrack_result$TF_type, levels = c("functional", "not_functional"))
-spatrack_result$rank <- as.numeric(spatrack_result$rank)
-spatrack_result$scaled_rank <- round((max(spatrack_result$rank) - spatrack_result$rank) / (max(spatrack_result$rank) - min(spatrack_result$rank)), 3)
-
-wilcox_result <- wilcox.test(spatrack_result$scaled_rank ~ spatrack_result$TF_type, data = spatrack_result, exact = FALSE)
-p_val <- round(wilcox_result$p.value, 2)
-
-if (p_val < 0.1) {
-  annotation_label <- if (p_val < 0.01) "***"
-                    else if (p_val < 0.05) "**"
-                    else "*"
-} else {
-  annotation_label <- "NS"
-}
-
-p <- ggplot(spatrack_result, aes(x = TF_type, y = scaled_rank, fill = TF_type)) +
-      geom_boxplot() +
-      geom_signif(comparisons = list(c("functional", "not_functional")), annotations = annotation_label, map_signif_level = TRUE, textsize = 5, vjust = 1.5) +
-      theme_bw() +
-      labs(title = "", x = "TF type", y = "Scaled rank") +
-      theme(legend.position = "none", axis.title = element_text(size = 14), axis.text = element_text(size = 12))
-ggsave("~/results/spatrack_TF_rank_spatrack_TF.pdf", p, width = 3.5, height = 3.5)
-'''
+gr.network_df.to_csv('~/spatrack_results_upstream.csv')

@@ -16,7 +16,7 @@ library(Matrix)
 data_dir <- "~/data/"
 output_dir <- "~/results/"
 
-options(future.globals.maxSize = 20 * 1024^3)  # 15 GB
+options(future.globals.maxSize = 20 * 1024^3)
 
 ##### 1. Pre-process
 ## Normalization
@@ -32,6 +32,7 @@ for(Res in c("002","008","016")){
 
 saveRDS(object, file=paste0(output_dir, "small_intestine_preprocess.rds"))
 
+## QC
 sampleName <- rep(c("002um","008um","016um"))
 sampleCol <- c("#FF5555","#D43F00","#8B0000")
 
@@ -52,8 +53,6 @@ boxplot(log10(as.numeric(object$nFeature_Spatial.002um)+1),
 abline(h=log10(c(10,100,500)), lwd=2)
 dev.off()
 
-
-## QC
 # nFeature >= 10 for 002um; nFeature >= 100 for 008um
 object <- readRDS(paste0(output_dir, "small_intestine_preprocess.rds"))
 
@@ -106,31 +105,6 @@ png(file=paste0(output_dir, "UMAP_features_clusterRes_008um.png"),width=1000,hei
 grid.arrange(p08_1,p08_2,p08_3,p08_4,ncol=2,nrow=2)
 dev.off()
 
-p16_1 <- DimPlot(object_016um_highQ, label = TRUE,group.by="Spatial.016um_snn_res.0.5", reduction = "umap.spatial") + ggtitle("016um res0.5")
-p16_2 <- DimPlot(object_016um_highQ, label = TRUE,group.by="Spatial.016um_snn_res.1", reduction = "umap.spatial") + ggtitle("016um res1.0")
-p16_3 <- DimPlot(object_016um_highQ, label = TRUE,group.by="Spatial.016um_snn_res.1.5", reduction = "umap.spatial") + ggtitle("016um res1.5")
-p16_4 <- DimPlot(object_016um_highQ, label = TRUE,group.by="Spatial.016um_snn_res.2", reduction = "umap.spatial") + ggtitle("016um res2.0")
-
-png(file=paste0(output_dir, "UMAP_features_clusterRes_016um.png"),width=1000,height=1000)
-grid.arrange(p16_1,p16_2,p16_3,p16_4,ncol=2,nrow=2)
-dev.off()
-
-
-Idents(object_008um_highQ) <- "Spatial.008um_snn_res.0.5"
-DefaultAssay(object_008um_highQ) <- "Spatial.008um"
-p1 <- DimPlot(object_008um_highQ, reduction = "umap.spatial", label = F) + theme(legend.position = "bottom")
-p2 <- SpatialDimPlot(object_008um_highQ, label = F) + theme(legend.position = "bottom")
-p <- p1 | p2
-ggsave(paste0(output_dir, "clusters_on_image_008um.png"), p)
-
-Idents(object_016um_highQ) <- "Spatial.016um_snn_res.0.5"
-DefaultAssay(object_016um_highQ) <- "Spatial.016um"
-p1 <- DimPlot(object_016um_highQ, reduction = "umap.spatial", label = F) + theme(legend.position = "bottom")
-p2 <- SpatialDimPlot(object_016um_highQ, label = F) + theme(legend.position = "bottom")
-p <- p1 | p2
-ggsave(paste0(output_dir, "clusters_on_image_016um.png"), p)
-
-
 
 
 ##### 2. Cell type label annotation
@@ -163,51 +137,62 @@ object_008um_highQ <- AddMetaData(object_008um_highQ, metadata = predicted_ct$pr
 
 saveRDS(object_008um_highQ, paste0(output_dir, "object_008um_highQ_with_ct_label.RDS"))
 
-
-## Visualization
-p <- ggplot(object_008um_highQ@meta.data, aes(x = Prediction_score)) +
-        geom_histogram(binwidth = 0.05, fill = "steelblue", color = "black") +
-        theme_minimal()   
-ggsave(paste0(output_dir, "prediction_score.pdf"), p)
-
-Idents(object_008um_highQ) <- object_008um_highQ$Cell_type
-p <- SpatialDimPlot(object_008um_highQ, label = F) + theme(legend.position = "bottom")
-ggsave(paste0(output_dir, "cell_type.pdf"), p, width = 10)
-
-
-coords <- GetTissueCoordinates(object_008um_highQ)
-p <- ggplot(coords, aes(x = x, y = y)) + geom_point(size = 0.1) + coord_fixed() + theme_bw()
-ggsave(paste0(output_dir, "coords.pdf"), p, width = 8, height = 6)
-
+## Subset area of interest
 selected_barcodes <- rownames(coords)[coords$y >= 10000 & coords$y <= 12500 & coords$x >= 13500 & coords$x <= 15000]
-
 subset_object <- subset(object_008um_highQ, cells = selected_barcodes)
-pallette <- c("Enterocyte.Immature.Distal"  = "#E41A1C", "Goblet" = "#377EB8", "Enterocyte.Mature.Distal" = "#4DAF4A", 
-              "Stem" = "#984EA3", "Paneth" = "#FF7F00", "Enterocyte.Progenitor.Early" = "#FFFF33", 
-              "Enterocyte.Progenitor.Late" = "#A65628", "Endocrine" = "#F781BF", "TA.Early" = "#009E73", 
-              "Enterocyte.Progenitor" = "#66C2A5", "TA.G1" = "#FC8D62", "Tuft" = "#8DA0CB", "TA.G2" = "#FFD92F")
 
-Idents(subset_object) <- subset_object$Cell_type
-p <- SpatialDimPlot(subset_object, label = F, pt.size.factor = 18, image.alpha = 0.7, alpha = c(0.8, 0.8), cols = pallette) + 
-        labs(fill = "Cell Type") +
-        theme(legend.text = element_text(size = 12))
-ggsave(paste0(output_dir, "cell_type_susbet.pdf"), p, width = 8, height = 6)
+subset_object$enterocyte_type <- ifelse(subset_object$Cell_type %in% c("Enterocyte.Progenitor", "Enterocyte.Progenitor.Late", "Enterocyte.Progenitor.Early"), "Enterocyte_Progenitor",
+                                        ifelse(subset_object$Cell_type == "Enterocyte.Immature.Distal", "Enterocyte_Immature", 
+                                            ifelse(subset_object$Cell_type == "Enterocyte.Mature.Distal", "Enterocyte_Mature", NA)))
 
 saveRDS(subset_object, paste0(output_dir, "subset_object_with_ct_label.RDS"))
 
 
 
-subset_ct_object <- subset(subset_object, subset = Cell_type %in% c("Enterocyte.Progenitor", "Enterocyte.Progenitor.Late", "Enterocyte.Progenitor.Early", 
-                                                                    "Enterocyte.Immature.Distal", "Enterocyte.Mature.Distal"))
+## Visualization
+source("~/manuscript_figures.r")
 
-subset_ct_object$enterocyte_type <- ifelse(subset_ct_object$Cell_type %in% c("Enterocyte.Progenitor", "Enterocyte.Progenitor.Late", "Enterocyte.Progenitor.Early"), "Enterocyte_Progenitor",
-                                        ifelse(subset_ct_object$Cell_type == "Enterocyte.Immature.Distal", "Enterocyte_Immature", 
-                                            ifelse(subset_ct_object$Cell_type == "Enterocyte.Mature.Distal", "Enterocyte_Mature", NA)))
+object_008um_highQ <- readRDS("~/object_008um_highQ_with_ct_label.RDS")
+Idents(object_008um_highQ) <- object_008um_highQ$Cell_type
 
-pallette <- c("Enterocyte_Immature"  = "#E41A1C", "Enterocyte_Mature" = "#4DAF4A", "Enterocyte_Progenitor" = "#FFFF33")
+subset_object <- readRDS("~/subset_object_with_ct_label.RDS")
+Idents(subset_object) <- subset_object$Cell_type
 
-Idents(subset_ct_object) <- subset_ct_object$enterocyte_type
-p <- SpatialDimPlot(subset_ct_object, label = F, pt.size.factor = 18, image.alpha = 0.7, alpha = c(0.8, 0.8), cols = pallette) + 
-        labs(fill = "Cell Type") +
-        theme(legend.text = element_text(size = 12))
-ggsave(paste0(output_dir, "subset_enterocyte.pdf"), p, width = 8, height = 6)
+subset_object_2 <- subset(subset_object, subset = enterocyte_type %in% c("Enterocyte_Progenitor", "Enterocyte_Immature", "Enterocyte_Mature"))
+Idents(subset_object_2) <- subset_object_2$enterocyte_type
+
+set.seed(1)
+pallette_1 <- c(sci_colors(8, effect = "contrast"), "#B266FF", "#9999FF", "#4D1A89", "#6600CC", "#E5CCFF", "#CCCCFF", "#CCE5FF")
+names(pallette_1) <- c("Stem", "TA.Early", "TA.G1", "TA.G2", "Goblet", "Paneth", "Endocrine", "Tuft", 
+                     "Enterocyte.Immature.Distal", "Enterocyte.Immature.Proximal", 
+                     "Enterocyte.Mature.Distal", "Enterocyte.Mature.Proximal", 
+                     "Enterocyte.Progenitor.Early", "Enterocyte.Progenitor.Late", "Enterocyte.Progenitor")
+
+pallette_2 <- c("Enterocyte_Immature"  = "#B266FF", "Enterocyte_Mature" = "#4D1A89", "Enterocyte_Progenitor" = "#E5CCFF")
+
+# Prediction score
+p <- ggplot(object_008um_highQ@meta.data, aes(x = Prediction_score)) +
+        geom_histogram(binwidth = 0.05, fill = "steelblue", color = "black") +
+        theme_minimal()   
+ggsave("prediction_score.pdf", p, width = 3.5, height = 4, dpi = 600)
+
+# Cell type labels
+p1 <- visium_cell_type_tissue(object_008um_highQ, pallette_1)
+ggsave("tissue_spatial_map.png", p1, width = 3.5, height = 4, dpi = 600)
+
+p2 <- visium_cell_type_spatial(subset_object, pallette_1, 18)
+ggsave("all_ct_spatial_map.png", p2, width = 5.5, height = 4, dpi = 600)
+
+p3 <-  visium_cell_type_spatial(subset_object_2, pallette_2, 18)
+ggsave("spatial_map.png", p3, width = 5.5, height = 4, dpi = 600)
+
+# Marker gene expression
+p12 <- visium_plot_gene(subset_object_1, "Krt19", 18)
+p13 <- visium_plot_gene(subset_object_1, "Anpep", 18)
+p14 <- visium_plot_gene(subset_object_1, "Maf", 18)
+p15 <- visium_plot_gene(subset_object_1, "Clca4a", 18)
+ggsave("Krt19_expr.png", p12, width = 3.5, height = 4, dpi = 600)
+ggsave("Anpep_expr.png", p13, width = 3.5, height = 4, dpi = 600)
+ggsave("Maf_expr.png", p14, width = 3.5, height = 4, dpi = 600)
+ggsave("Clca4a_expr.png", p15, width = 3.5, height = 4, dpi = 600)
+
