@@ -25,12 +25,13 @@ subset_object <- readRDS("~/mm_small_intestine.RDS")
 expression_matrix <- object@assays$Spatial.008um@layers$counts
 colnames(expression_matrix) <- rownames(object@assays$Spatial.008um@cells)
 rownames(expression_matrix) <- rownames(object@assays$Spatial.008um@features)
+
 cell_metadata <- object@meta.data
 cell_metadata$cell_type <- cell_metadata$enterocyte_type
-feature_metadata <- data.frame(gene_short_name = rownames(expression_matrix), row.names = rownames(expression_matrix))
+
 spatial_coordinates <- GetTissueCoordinates(object)
 
-obj <- prepare_input(expression_matrix, cell_metadata, feature_metadata, spatial_coordinates, cell_types = c("Enterocyte_Progenitor", "Enterocyte_Immature", "Enterocyte_Mature"))
+obj <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types = c("Enterocyte_Progenitor", "Enterocyte_Immature", "Enterocyte_Mature"))
 ```
 
 ## 3. Detect pseudo-temporally variable features (TVFs)
