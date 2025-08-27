@@ -140,21 +140,18 @@ preprocess_data <- function(moran_object) {
 #' @importFrom stats scale
 #'
 #' @export
-compute_morans_I <- function(moran_object) {
+compute_morans_I <- function(moran_object, show_progress = TRUE) {
   # Input validation
   if (!is.list(moran_object)) {
     stop("Error: moran_object must be a list.")
   }
-  
   required_elements <- c("scaled_S", "scaled_y")
   if (!all(required_elements %in% names(moran_object))) {
     stop("Error: moran_object must contain 'scaled_S' and 'scaled_y'.")
   }
-  
   if (!is.matrix(moran_object$scaled_S)) {
     stop("Error: moran_object$scaled_S must be a matrix.")
   }
-  
   if (!is.list(moran_object$scaled_y)) {
     stop("Error: moran_object$scaled_y must be a list.")
   }
@@ -163,12 +160,9 @@ compute_morans_I <- function(moran_object) {
   coords <- as.data.frame(S)
   k <- min(5, nrow(coords) - 1)
 
-  # Ensure there are enough points for k-nearest neighbors
   if (nrow(coords) < 2) {
     stop("Error: Not enough spatial points for nearest neighbor analysis.")
   }
-
-  # Check for missing values
   if (any(is.na(coords))) {
     stop("Error: Missing values found in spatial coordinates.")
   }
@@ -188,30 +182,42 @@ compute_morans_I <- function(moran_object) {
   scaled_y <- moran_object$scaled_y
   morans_test <- list()
 
-  for (i in names(scaled_y)) {
+  feature_names <- names(scaled_y)
+  n_feat <- length(feature_names)
+
+  # ----- Progress bar (JINDUTIAO) -----
+  if (show_progress) {
+    pb <- utils::txtProgressBar(min = 0, max = n_feat, style = 3)
+    on.exit(try(close(pb), silent = TRUE), add = TRUE)
+  }
+
+  for (idx in seq_len(n_feat)) {
+    i <- feature_names[idx]
     y <- scaled_y[[i]]
 
     # Ensure y is numeric
     if (!is.numeric(y)) {
       message(paste("Skipping feature:", i, " - y is not numeric"))
+      if (show_progress) utils::setTxtProgressBar(pb, idx)
       next
     }
 
     # Skip if all values in y are zero
     if (all(y == 0, na.rm = TRUE)) {
       message(paste("Skipping feature:", i, " - all values are zero"))
+      if (show_progress) utils::setTxtProgressBar(pb, idx)
       next
     }
 
-    # Skip if y contains NA values
+    # Skip if y contains NA or Inf
     if (any(is.na(y))) {
       message(paste("Skipping feature:", i, " - contains NA values"))
+      if (show_progress) utils::setTxtProgressBar(pb, idx)
       next
     }
-
-    # Skip if y contains infinite values
     if (any(is.infinite(y))) {
       message(paste("Skipping feature:", i, " - contains infinite values"))
+      if (show_progress) utils::setTxtProgressBar(pb, idx)
       next
     }
 
@@ -222,14 +228,17 @@ compute_morans_I <- function(moran_object) {
       message(paste("Skipping feature:", i, " - Moran's test failed:", e$message))
       return(NULL)
     })
+
+    if (show_progress) utils::setTxtProgressBar(pb, idx)
   }
 
-  if (length(morans_test) == 0) {
+  if (length(Filter(Negate(is.null), morans_test)) == 0) {
     stop("Error: No valid features for Moran's I computation.")
   }
 
   return(morans_test)
 }
+
 
 #' Extract Significant Moran's I Results
 #'
