@@ -22,7 +22,7 @@ devtools::install_github("CorazonJW/BARTsp")
 
 Here's a basic example of how to use BARTsp:
 
-# 1. Prepare inputs
+### 1. Prepare inputs
 ```r
 library(BARTsp)
 
@@ -37,14 +37,14 @@ spatial_coordinates <- GetTissueCoordinates(seurat_object)
 input_data <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types)
 ```
 
-# 2. Detect pseudo-temporally varaible features (TVFs)
+### 2. Detect pseudo-temporally varaible features (TVFs)
 ```r
 trajectory <- construct_trajectory(input_data, start_cell_type = "cell_type_A")
 traj_DEG <- get_traj_features(trajectory$pseudotime, input_data, pval_cutoff = 0.05, 
                               cor_cutoff_pos = 0.1, cor_cutoff_neg = -0.1)
 ```
 
-# 3. Detect spatially varaible features (SVFs)
+### 3. Detect spatially varaible features (SVFs)
 ```r
 # Moran's I
 moran_obj <- prepare_moran_input(obj)
@@ -67,13 +67,13 @@ sp_DEG <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
 knn_result <- run_knn_spatial(input_data, k = 5, method = "correlation", cutoff = 0.1)
 ```
 
-# 4. Construct BART algorithm input
+### 4. Construct BART algorithm input
 ```r
 genes <- get_sig_features_geneset(traj_DEG, sp_DEG)
 bart_input <- construct_BART_geneset_input(genes)
 ```
 
-# 5. Run BART
+### 5. Run BART
 ```r
 bart_proj <- bart(name = "my_analysis", genome = "mm10", data = bart_input, type = "geneset")
 bart_results <- run_BART(bart_proj)
@@ -82,7 +82,7 @@ results <- get_BART_results(bart_proj)
 plot_BART_results(results, TF_of_interest = c("TF1", "TF2"), cutoff = 0.05)
 ```
 
-# 6. Integrate upstream and downstream predictions
+### 6. Integrate upstream and downstream predictions
 ```r
 dt <- integrate_bart_result(results_geneset_up, results_geneset_down, cutoff_up = 0.05, cutoff_down = 0.05)
 
