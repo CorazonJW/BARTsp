@@ -1,4 +1,4 @@
-# 1. Load relevant packages
+## 1. Load relevant packages
 
 Mouse small intestine Visium HD raw data can be found at https://www.10xgenomics.com/datasets/visium-hd-cytassist-gene-expression-libraries-of-mouse-intestine. Processed Seurat object can be found at https://github.com/CorazonJW/BARTsp/tree/main/data/mm_small_intestine_data.RDS.
  
@@ -11,14 +11,13 @@ library(Matrix)
 library(BARTsp)
 ```
 
-# 2. Prepare input
+## 2. Prepare input
 
 Inputs include
 1. expression_matrix: A gene by cell read count matrix. 
 2. cell_metadata: A data frame of cell information. It must contain a column named "cell_type". 
-3. feature_metadata: A data frame of feature names, required by Monocle3 for pseudo-time analysis. 
-4. spatial_coordinates: A data frame containing the spatial locations of each cell. It must include columns named "x" and "y". 
-5. cell_types: A vector of regions (cell types) of interest. 
+3. spatial_coordinates: A data frame containing the spatial locations of each cell. It must include columns named "x" and "y". 
+4. cell_types: A vector of regions (cell types) of interest. 
 
 ```{r, echo=TRUE, results='markup'}
 subset_object <- readRDS("~/mm_small_intestine.RDS")
@@ -34,9 +33,9 @@ spatial_coordinates <- GetTissueCoordinates(object)
 obj <- prepare_input(expression_matrix, cell_metadata, feature_metadata, spatial_coordinates, cell_types = c("Enterocyte_Progenitor", "Enterocyte_Immature", "Enterocyte_Mature"))
 ```
 
-# 3. Compute trajectory and obtain DEGs along pseudo-time
+## 3. Detect pseudo-temporally variable features (TVFs)
 
-This step identifies genes whose expression changes as pseudo-time increases. 
+This step identifies genes whose expression changes as pseudo-time increases.
 
 ```{r, echo=TRUE, results='markup'}
 cds <- construct_trajectory(obj, start_cell_type = "Enterocyte_Progenitor")
@@ -46,7 +45,7 @@ traj_DEG <- get_traj_features(pseudotime_values, obj, pval_cutoff = 0.1,
                               cor_cutoff_pos = 0.05, cor_cutoff_neg = -0.05)
 ```
 
-# 4. Compute Moran's I for each gene and select DEGs across spatial locations
+## 4. Detect spatially variable features (SVFs)
 
 This step calculates Moran's I for each gene. Moran's I is a measure of spatial autocorrelation. It tells you whether similar values (e.g., gene expression) tend to cluster together in space. A positive Moran's I indicates that the gene is spatially variable, meaning its expression is not random but clustered in certain regions. This spatial variability reflects underlying cell differentiation patterns, where specific genes are upregulated in localized populations of differentiating cells.
 
@@ -77,56 +76,56 @@ sparkx_DEG <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
 knn_result <- run_knn_spatial(obj, k = 5, method = "correlation", cutoff = 0.3)
 ```
 
-# 5. Construct input for BART
+## 5. Construct input for BART algorithm
 
-In geneset mode, we use the intersection of pseudo-time-related DEGs and SVGs to ensure precision. The overlapping gene set is then divided into two categories based on their expression patterns along the trajectory. Genes whose expression increases with pseudo-time are considered downstream-active genes, likely regulated by transcription factors active later in the differentiation process. In contrast, genes whose expression negatively correlates with pseudo-time are considered upstream-active genes, assumed to be regulated by TFs acting earlier in the trajectory.
+In geneset mode, we use the intersection of TVFs and SVFs to ensure precision. The overlapping geneset is then divided into two categories based on their expression patterns along the trajectory. Genes whose expression increases with pseudo-time are considered downstream-active genes, likely regulated by transcription regulators (TRs) active later in the differentiation process. In contrast, genes whose expression negatively correlates with pseudo-time are considered upstream-active genes, assumed to be regulated by TRs acting earlier in the trajectory.
 
 ```{r, echo=TRUE, results='markup'}
 genes <- get_sig_features_geneset(traj_DEG, moran_DEG)
 geneset <- construct_BART_geneset_input(genes)
 ```
 
-# 6. Run BART
+## 6. Run BART
 
-Decreasingly-expressed genes are used to predict TFs active at upstream in the trajectory
-Increasingly-expressed genes are used to predict TFs active at downstream in the trajectory
+Decreasingly-expressed genes are used to predict TRs active at upstream in the trajectory. 
+Increasingly-expressed genes are used to predict TRs active at downstream in the trajectory. 
 
 ```{r, echo=TRUE, results='markup'}
-# Decreasingly-expressed genes (to predict TFs at upstream )
+# Decreasingly-expressed genes (to predict TRs at upstream )
 bart_proj <- bart(name = "enterocyte", genome = "mm10", data = geneset$down_gene$significant_features, type = "geneset")
 bart_proj <- run_BART(bart_proj, type = "geneset")
 results_geneset_up <- get_BART_results(bart_proj, "geneset")
 
-# Increasingly-expressed genes (to predict TFs at downstream)
+# Increasingly-expressed genes (to predict TRs at downstream)
 bart_proj <- bart(name = "enterocyte", genome = "mm10", data = geneset$up_gene$significant_features, type = "geneset")
 bart_proj <- run_BART(bart_proj, type = "geneset")
 results_geneset_down <- get_BART_results(bart_proj, "geneset")
 ```
 
-# 7. Visualize BART predicted results
+## 7. Visualize BART-spatial prediction
 
-Users can highlight the top TFs predicted by BART and/or TFs of interest in visualization step. 
+Users can highlight the top TRs predicted by BART and/or TRs of interest in visualization step. 
 
 ```{r, echo=TRUE, results='markup', fig.width=10, fig.height=8}
 TF_of_interest <- c("HNF4G", "HNF4A", "GATA6", "HNF1B", "MAF", "CDX2", "MAFB", "GATA4", "ATOH1", "HES1")
 
-# TFs at upstream
+# TRs at upstream
 plot_BART_results(results_geneset_up, TF_of_interest, cutoff = 0.05, top_n = 6)
 
-# TFs at downstream
+# TRs at downstream
 plot_BART_results(results_geneset_down, TF_of_interest, cutoff = 0.05, top_n = 6)
 ```
 
-# 8. Integrate BART predicted results
+## 8. Integrate BART-spatial prediction
 
-This step allows integrative analysis of upstream-active and downstream-active TFs. 
+This step allows integrative analysis of upstream-active and downstream-active TRs. 
 
 ```{r, echo=TRUE, results='markup', fig.width=10, fig.height=8}
 dt <- integrate_bart_result(results_geneset_up, results_geneset_down, cutoff_up = 0.05, cutoff_down = 0.05)
 
-# Visualize integrated ranks of all TFs
 # This function shows the top n active at upstream and downstream
 plot_integration_bar(dt, top_n = 10)
-# This function demonstrates all TFs and highlights user-defined TFs of interst
+
+# This function demonstrates all upstream and downsteam predictions as a single plot and highlights user-defined TRs of interst
 plot_integration_dot <- (dt, tf_highlight = TF_of_interest)
 ```
