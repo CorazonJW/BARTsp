@@ -64,7 +64,7 @@ for (i in seq_along(morana_I_result)) {
 moran_DEG <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.1)
 ```
 
-### (Alternative methods to find SVGs)
+### (Alternative methods to find SVFs)
 
 Users can use SPARKX or KNN-based methods to identify spatially variable genes. 
 
