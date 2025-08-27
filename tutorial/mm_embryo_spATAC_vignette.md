@@ -1,6 +1,6 @@
 ## 1. Load relevant packages
 
-E13 mouse embryo spRNA data can be found at https://github.com/CorazonJW/BARTsp/tree/main/data/mm_embryo_spRNA_spATAC.RDS.
+E13 mouse embryo co-profiling data can be found at https://cells.ucsc.edu/?ds=brain-spatial-omics+e13. Single-cell RNA reference can be found at https://oncoscape.v3.sttrcancer.org/atlas.gs.washington.edu.mouse.rna/downloads. 
  
 ```{r, echo=TRUE, results='markup'}
 library(Seurat)
