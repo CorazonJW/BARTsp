@@ -1,6 +1,7 @@
 ## 1. Load relevant packages
 
-Mouse small intestine Visium HD raw data can be found at https://www.10xgenomics.com/datasets/visium-hd-cytassist-gene-expression-libraries-of-mouse-intestine. Processed Seurat object can be found at https://github.com/CorazonJW/BARTsp/tree/main/data/mm_small_intestine_data.RDS.
+Mouse small intestine Visium HD raw data can be found at https://www.10xgenomics.com/datasets/visium-hd-cytassist-gene-expression-libraries-of-mouse-intestine.
+Mouse small intestine single-cell reference can be found at https://singlecell.broadinstitute.org/single_cell/study/SCP44/small-intestinal-epithelium#study-download.
  
 ```{r, echo=TRUE, results='markup'}
 library(Seurat)
