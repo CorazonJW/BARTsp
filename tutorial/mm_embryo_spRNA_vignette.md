@@ -3,12 +3,12 @@
 E13 mouse embryo co-profiling data can be found at https://cells.ucsc.edu/?ds=brain-spatial-omics+e13. Single-cell RNA reference can be found at https://oncoscape.v3.sttrcancer.org/atlas.gs.washington.edu.mouse.rna/downloads. 
  
 ```{r, echo=TRUE, results='markup'}
-library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(Matrix)
 
-library(BARTsp)
+suppressMessages(library(Seurat))
+suppressMessages(library(BARTsp))
 ```
 
 ## 2. Prepare input

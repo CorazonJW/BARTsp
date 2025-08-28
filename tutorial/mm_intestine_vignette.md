@@ -4,12 +4,12 @@ Mouse small intestine Visium HD raw data can be found at https://www.10xgenomics
 Mouse small intestine single-cell reference can be found at https://singlecell.broadinstitute.org/single_cell/study/SCP44/small-intestinal-epithelium#study-download.
  
 ```{r, echo=TRUE, results='markup'}
-library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(Matrix)
 
-library(BARTsp)
+suppressMessages(library(Seurat))
+suppressMessages(library(BARTsp))
 ```
 
 ## 2. Prepare input

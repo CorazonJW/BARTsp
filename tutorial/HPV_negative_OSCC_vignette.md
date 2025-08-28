@@ -3,12 +3,12 @@
 HPV negative OSCC Visium raw data and processed Seurat object can be found at https://doi.org/10.6084/m9.figshare.20304456.v1. 
  
 ```{r, echo=TRUE, results='markup'}
-library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(Matrix)
 
-library(BARTsp)
+suppressMessages(library(Seurat))
+suppressMessages(library(BARTsp))
 ```
 
 ## 2. Prepare input
