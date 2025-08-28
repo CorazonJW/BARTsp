@@ -43,8 +43,8 @@ This step identifies genes whose expression changes as pseudo-time increases.
 cds <- construct_trajectory(obj, "Radial glia")
 pseudotime_values <- monocle3::pseudotime(cds)
 
-traj_DEG <- get_traj_features(pseudotime_values, obj, pval_cutoff = 0.1, 
-                              cor_cutoff_pos = 0.1250701, cor_cutoff_neg = -0.2456667)
+TVFs <- get_traj_features(pseudotime_values, obj, pval_cutoff = 0.1, 
+                          cor_cutoff_pos = 0.1250701, cor_cutoff_neg = -0.2456667)
 ```
 
 ## 4. Detect spatially variable features (SVFs)
@@ -62,7 +62,7 @@ for (i in seq_along(morana_I_result)) {
     morana_I_result[[i]]$adjusted_p.value <- adjusted_p_values[i]
 }
 
-moran_DEG <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.2373)
+SVFs <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.2373)
 ```
 
 ## 5. Construct input for BART algorithm
@@ -70,7 +70,7 @@ moran_DEG <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.2373)
 In geneset mode, we use the intersection of TVFs and SVFs to ensure precision. The overlapping geneset is then divided into two categories based on their expression patterns along the trajectory. Genes whose expression increases with pseudo-time are considered downstream-active genes, likely regulated by transcription regulators (TRs) active later in the differentiation process. In contrast, genes whose expression negatively correlates with pseudo-time are considered upstream-active genes, assumed to be regulated by TRs acting earlier in the trajectory.
 
 ```{r, echo=TRUE, results='markup'}
-genes <- get_sig_features_geneset(traj_DEG, moran_DEG)
+genes <- get_sig_features_geneset(TVFs, SVFs)
 geneset <- construct_BART_geneset_input(genes)
 ```
 
@@ -81,12 +81,12 @@ Increasingly-expressed genes are used to predict TRs active at downstream in the
 
 ```{r, echo=TRUE, results='markup'}
 # Decreasingly-expressed genes (to predict TRs at upstream)
-bart_proj <- bart(name = "radial glia to PPN", genome = "mm10", data = geneset$upstream$feature, type = "geneset")
+bart_proj <- bart(name = "Upstream", genome = "mm10", data = geneset$upstream$feature, type = "geneset")
 bart_proj <- run_BART(bart_proj, type = "geneset")
 results_geneset_up <- get_BART_results(bart_proj, "geneset")
 
 # Increasingly-expressed genes (to predict TRs at downstream)
-bart_proj <- bart(name = "radial glia to PPN", genome = "mm10", data = geneset$downstream$feature, type = "geneset")
+bart_proj <- bart(name = "Downstream", genome = "mm10", data = geneset$downstream$feature, type = "geneset")
 bart_proj <- run_BART(bart_proj, type = "geneset")
 results_geneset_down <- get_BART_results(bart_proj, "geneset")
 ```

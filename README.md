@@ -26,22 +26,20 @@ Here's a basic example of how to use BARTsp:
 ```r
 library(BARTsp)
 
-# Three inputs are required: (1) expression matrix; (2) cell metadata; (3) spatial coordinates
-seurat_object <- readRDS("PATH/TO/SEURAT_OBJECT")
-expression_matrix <- seurat_object@assays$Spatial.008um@layers$counts
-colnames(expression_matrix) <- rownames(seurat_object@assays$Spatial.008um@cells)
-rownames(expression_matrix) <- rownames(seurat_object@assays$Spatial.008um@features)
-cell_metadata <- seurat_object@meta.data # cell_metadata must contain a column named "Cell_type"
-spatial_coordinates <- GetTissueCoordinates(seurat_object)
+# Three inputs are required: (1) expression matrix; (2) cell metadata containing a column named "Cell_type"; (3) spatial coordinates
 
 input_data <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types)
 ```
 
 ### 2. Detect pseudo-temporally varaible features (TVFs)
 ```r
+# For RNA mode, monocle3 is used to compute pseudo-time. 
 trajectory <- construct_trajectory(input_data, start_cell_type = "cell_type_A")
-traj_DEG <- get_traj_features(trajectory$pseudotime, input_data, pval_cutoff = 0.05, 
-                              cor_cutoff_pos = 0.1, cor_cutoff_neg = -0.1)
+
+# For ATAC mode, we recommand users to use ArchR to calculate pseudo-time. 
+
+TVFs <- get_traj_features(trajectory$pseudotime, input_data, pval_cutoff = 0.05, 
+                          cor_cutoff_pos = 0.1, cor_cutoff_neg = -0.1)
 ```
 
 ### 3. Detect spatially varaible features (SVFs)
@@ -57,27 +55,43 @@ for (i in seq_along(morana_I_result)) {
     morana_I_result[[i]]$adjusted_p.value <- adjusted_p_values[i]
 }
 
-sp_DEG <- get_moran_result(morana_I_result, adj.val = 0.05, moransI = 0.1)
+SVFs <- get_moran_result(morana_I_result, adj.val = 0.05, moransI = 0.1)
 
 # (Alternative) SPARKX
 sparkx_result <- run_SPARKX(input_data, numCores = 4)
-sp_DEG <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
+SVFs <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
 
 # (Alternative) KNN
-knn_result <- run_knn_spatial(input_data, k = 5, method = "correlation", cutoff = 0.1)
+SVFs <- run_knn_spatial(input_data, k = 5, method = "correlation", cutoff = 0.1)
 ```
 
 ### 4. Construct BART algorithm input
+#### RNA mode
 ```r
-genes <- get_sig_features_geneset(traj_DEG, sp_DEG)
+genes <- get_sig_features_geneset(TVFs, SVFs)
 bart_input <- construct_BART_geneset_input(genes)
+```
+#### ATAC mode
+```r
+region <- get_sig_features_region(obj, TVFs, SVFs)
+bart_input <- construct_BART_region_input(region, description_up = "upstream", description_down = "downstream")
 ```
 
 ### 5. Run BART
+#### RNA mode
 ```r
 bart_proj <- bart(name = "my_analysis", genome = "mm10", data = bart_input, type = "geneset")
-bart_results <- run_BART(bart_proj)
-results <- get_BART_results(bart_proj)
+bart_results <- run_BART(bart_proj, type = "geneset")
+results <- get_BART_results(bart_proj, type = "geneset")
+
+plot_BART_results(results, TF_of_interest = c("TF1", "TF2"), cutoff = 0.05)
+```
+
+#### ATAC mode
+```r
+bart_proj <- bart(name = "my_analysis", genome = "mm10", data = bart_input, type = "region")
+bart_results <- run_BART(bart_proj, type = "region")
+results <- get_BART_results(bart_proj, type = "region")
 
 plot_BART_results(results, TF_of_interest = c("TF1", "TF2"), cutoff = 0.05)
 ```

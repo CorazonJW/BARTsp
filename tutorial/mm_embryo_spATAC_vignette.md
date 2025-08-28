@@ -42,8 +42,8 @@ This step identifies genes whose expression changes as pseudo-time increases.
 ```{r, echo=TRUE, results='markup'}
 pseudotime_values <- E13_sp$spATAC_traj
 
-traj_DAR <- get_traj_features(pseudotime_values, obj, pval_cutoff = 0.1, 
-                              cor_cutoff_pos = 0.1993, cor_cutoff_neg = -0.2216)
+TVFs <- get_traj_features(pseudotime_values, obj, pval_cutoff = 0.1, 
+                          cor_cutoff_pos = 0.1993, cor_cutoff_neg = -0.2216)
 ```
 
 ## 4. Detect spatially variable features (SVFs)
@@ -61,7 +61,7 @@ for (i in seq_along(morana_I_result)) {
     morana_I_result[[i]]$adjusted_p.value <- adjusted_p_values[i]
 }
 
-moran_DAR <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.099)
+SVFs <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.099)
 ```
 
 ## 5. Construct input for BART
@@ -70,8 +70,8 @@ In the ATAC mode, BART-spatial uses the union of SVFs and TVFs instead of inters
 The union regionset is then divided into two categories based on their accessibility patterns along the trajectory. Features whose accessibility trend is positively correlated with pseudo-time are downstream-active genes and used for inferring transcription regulators (TRs) active later in the differentiation process. In contrast, features whose accessibility trend is negatively correlated with pseudo-time are upstream-active genes and used for upstream-active TR prediction. 
 
 ```{r, echo=TRUE, results='markup'}
-region <- get_sig_features_region(obj, traj_DAR, moran_DAR)
-regions <- construct_BART_region_input(region, description_up = "traj_up", description_down = "traj_down")
+region <- get_sig_features_region(obj, TVFs, SVFs)
+regionset <- construct_BART_region_input(region, description_up = "upstream", description_down = "downstream")
 ```
 
 ## 6. Run BART
@@ -81,12 +81,12 @@ Increasingly-expressed genes are used to predict TRs active at downstream in the
 
 ```{r, echo=TRUE, results='markup'}
 # Decreasingly-expressed genes (to predict Rs at upstream)
-bart_proj <- bart(name = "radial glia to PPN", genome = "mm10", data = regions$up_region, type = "region")
+bart_proj <- bart(name = regionset$description_up, genome = "mm10", data = regionset$up_region, type = "region")
 bart_proj <- run_BART(bart_proj, type = "region")
 results_region_up <- get_BART_results(bart_proj, "region")
 
 # Increasingly-expressed genes (to predict TRs at downstream)
-bart_proj <- bart(name = "radial glia to PPN", genome = "mm10", data = regions$down_region, type = "region")
+bart_proj <- bart(name = regionset$description_down, genome = "mm10", data = regionset$down_region, type = "region")
 bart_proj <- run_BART(bart_proj, type = "region")
 results_region_down <- get_BART_results(bart_proj, "region")
 ```
