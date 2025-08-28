@@ -21,6 +21,7 @@ Inputs include
 
 ```{r, echo=TRUE, results='markup'}
 E13_sp <- readRDS("~/mm_embryo_spRNA_spATAC.RDS")
+data("mm_embryo_coprofiling")
 
 expression_matrix <- E13_sp@assays$peaks@counts
 

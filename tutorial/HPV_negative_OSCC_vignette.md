@@ -31,6 +31,7 @@ spatial_coordinates <- GetTissueCoordinates(sample_2)
 colnames(spatial_coordinates) <- c("x", "y")
 
 cell_type <- c("core", "edge", "transitory")
+
 obj <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_type)
 ```
 

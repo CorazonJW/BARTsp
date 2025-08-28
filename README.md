@@ -44,7 +44,6 @@ TVFs <- get_traj_features(trajectory$pseudotime, input_data, pval_cutoff = 0.05,
 
 ### 3. Detect spatially varaible features (SVFs)
 ```r
-# Moran's I
 moran_obj <- prepare_moran_input(obj)
 moran_obj <- preprocess_data(moran_obj)
 morana_I_result <- compute_morans_I(moran_obj)
@@ -56,13 +55,6 @@ for (i in seq_along(morana_I_result)) {
 }
 
 SVFs <- get_moran_result(morana_I_result, adj.val = 0.05, moransI = 0.1)
-
-# (Alternative) SPARKX
-sparkx_result <- run_SPARKX(input_data, numCores = 4)
-SVFs <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
-
-# (Alternative) KNN
-SVFs <- run_knn_spatial(input_data, k = 5, method = "correlation", cutoff = 0.1)
 ```
 
 ### 4. Construct BART algorithm input
@@ -86,7 +78,6 @@ results <- get_BART_results(bart_proj, type = "geneset")
 
 plot_BART_results(results, TF_of_interest = c("TF1", "TF2"), cutoff = 0.05)
 ```
-
 #### ATAC mode
 ```r
 bart_proj <- bart(name = "my_analysis", genome = "mm10", data = bart_input, type = "region")

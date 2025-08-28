@@ -1,7 +1,9 @@
-#' HPV-negative OSCC Visium Sample 2
+#' Test data
 #'
 #' A dataset containing ...
 #'
 #' @format An object of class ...
 #' @source ...
 "HPV_negative_OSCC_Visium_sample_2"
+"mm_small_intestine_Visium_HD"
+"mm_embryo_coprofiling"
