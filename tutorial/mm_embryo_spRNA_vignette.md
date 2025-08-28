@@ -8,7 +8,7 @@ library(dplyr)
 library(Matrix)
 
 suppressMessages(library(Seurat))
-suppressMessages(library(BARTsp))
+suppressWarnings(library(BARTsp))
 ```
 
 ## 2. Prepare input
