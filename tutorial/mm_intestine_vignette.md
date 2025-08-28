@@ -67,19 +67,6 @@ for (i in seq_along(morana_I_result)) {
 SVFs <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.01)
 ```
 
-## (Alternative methods to find SVGs)
-
-Users can use SPARKX or KNN-based methods to identify spatially variable genes. 
-
-```{r, echo=TRUE, results='markup'}
-# SPARKX
-sparkx_result <- run_SPARKX(obj, numCores = 4)
-SVFs <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
-
-# KNN-based method
-SVFs <- run_knn_spatial(obj, k = 5, method = "correlation", cutoff = 0.3)
-```
-
 ## 5. Construct input for BART algorithm
 
 In geneset mode, we use the intersection of TVFs and SVFs to ensure precision. The overlapping geneset is then divided into two categories based on their expression patterns along the trajectory. Genes whose expression increases with pseudo-time are considered downstream-active genes, likely regulated by transcription regulators (TRs) active later in the differentiation process. In contrast, genes whose expression negatively correlates with pseudo-time are considered upstream-active genes, assumed to be regulated by TRs acting earlier in the trajectory.
