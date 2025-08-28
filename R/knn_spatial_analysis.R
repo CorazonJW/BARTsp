@@ -210,7 +210,7 @@ run_knn_spatial <- function(object, k = 5, method = "correlation", cutoff = NULL
   # Calculate importance scores
   importance_scores <- tryCatch({
     calculate_importance_score(
-      object$expression_matrix,
+      as.matrix(object$expression_matrix),
       neighbors_result$neighbors,
       neighbors_result$distances,
       method = method
