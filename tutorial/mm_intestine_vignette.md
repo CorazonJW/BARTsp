@@ -22,6 +22,7 @@ Inputs include
 
 ```{r, echo=TRUE, results='markup'}
 data("mm_small_intestine_Visium_HD")
+object <- mm_small_intestine_data
 
 expression_matrix <- object@assays$Spatial.008um@layers$counts
 colnames(expression_matrix) <- rownames(object@assays$Spatial.008um@cells)
