@@ -67,14 +67,9 @@ SVFs <- get_moran_result(morana_I_result, adj.val = 0.1, moransI = 0.1)
 
 ### (Alternative methods to find SVFs)
 
-Users can use SPARKX or KNN-based methods to identify spatially variable genes. 
+Users can use KNN-based methods to identify spatially variable genes. 
 
 ```{r, echo=TRUE, results='markup'}
-# SPARKX
-sparkx_result <- run_SPARKX(obj, numCores = 4)
-SVFs <- get_sparkx_DEGs(sparkx_result, cutoff = 0.05)
-
-# KNN-based method
 SVFs <- run_knn_spatial(obj, k = 5, method = "correlation", cutoff = 0.3)
 ```
 
