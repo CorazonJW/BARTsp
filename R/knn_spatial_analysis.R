@@ -79,10 +79,6 @@ compute_neighbors <- function(spatial_coordinates, k = 5) {
 #' @export
 calculate_importance_score <- function(expression_matrix, neighbors, distances, method = "correlation") {
   # Ensure inputs are valid
-  if (!is.matrix(expression_matrix)) {
-    stop("Error: expression_matrix must be a matrix.")
-  }
-  
   if (!is.matrix(neighbors) || !is.matrix(distances)) {
     stop("Error: neighbors and distances must be matrices.")
   }

@@ -20,14 +20,14 @@ Inputs include
 4. cell_types: A vector of regions (cell types) of interest. 
 
 ```{r, echo=TRUE, results='markup'}
-subset_object <- readRDS("~/ocss.RDS")
+data("HPV_negative_OSCC_Visium_sample_2")
 
-expression_matrix <- object@assays$SCT@counts
+expression_matrix <- sample_2@assays$SCT@counts
 
-cell_metadata <- object@meta.data
+cell_metadata <- sample_2@meta.data
 cell_metadata$cell_type <- as.character(cell_metadata$cluster_annotations)
 
-spatial_coordinates <- GetTissueCoordinates(object)
+spatial_coordinates <- GetTissueCoordinates(sample_2)
 colnames(spatial_coordinates) <- c("x", "y")
 
 cell_type <- c("core", "edge", "transitory")
