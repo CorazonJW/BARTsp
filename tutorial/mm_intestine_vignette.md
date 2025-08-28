@@ -5,9 +5,8 @@ Mouse small intestine single-cell reference can be found at https://singlecell.b
  
 ```{r, echo=TRUE, results='markup'}
 library(ggplot2)
-library(dplyr)
 library(Matrix)
-
+suppressMessages(library(dplyr))
 suppressMessages(library(Seurat))
 suppressWarnings(library(BARTsp))
 ```

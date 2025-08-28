@@ -4,9 +4,8 @@ HPV negative OSCC Visium raw data and processed Seurat object can be found at ht
  
 ```{r, echo=TRUE, results='markup'}
 library(ggplot2)
-library(dplyr)
 library(Matrix)
-
+suppressMessages(library(dplyr))
 suppressMessages(library(Seurat))
 suppressWarnings(library(BARTsp))
 ```
