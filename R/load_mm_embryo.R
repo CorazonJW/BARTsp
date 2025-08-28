@@ -1,23 +1,19 @@
 #' Load the full mm_embryo_coprofiling dataset (download-once cache)
 #'
-#' Downloads a large `.rda` from a GitHub Release (or a direct URL),
-#' caches it in a per-user directory, verifies integrity (MD5), and loads
-#' the object `mm_embryo_coprofiling` into the current session.
+#' Downloads/caches a large `.rda` from a GitHub Release (or a direct URL),
+#' then loads the object into the current session. If the file's internal
+#' object name is not `mm_embryo_coprofiling` (e.g., it's `subset`), this
+#' function will load it and assign it under the canonical name.
 #'
-#' @param dest Cache directory; default is a per-user cache.
-#' @param repo GitHub "owner/repo" string used by \pkg{piggyback}.
+#' @param dest Cache directory (default: per-user cache).
+#' @param repo GitHub "owner/repo" used by \pkg{piggyback}.
 #' @param tag  GitHub Release tag that contains the asset.
 #' @param asset Filename of the asset on the Release.
 #' @param download_url Optional direct URL to the .rda (skip \pkg{piggyback}).
-#' @param envir Environment to load the object into. Default: `.GlobalEnv`.
-#' @param expected_md5 Optional checksum override (defaults to package constant).
-#' @return (Invisibly) the loaded `mm_embryo_coprofiling` object.
+#' @param envir Environment to load the object into (default: `.GlobalEnv`).
+#' @param object_name Canonical name to assign in the session.
+#' @return (Invisibly) the loaded object (also available as `object_name` in `envir`).
 #' @export
-#' @examples
-#' \dontrun{
-#'   mm <- load_mm_embryo()
-#'   str(mm)
-#' }
 load_mm_embryo <- function(
   dest = bartsp_data_dir(),
   repo = "CorazonJW/BARTsp",
@@ -25,16 +21,14 @@ load_mm_embryo <- function(
   asset = "mm_embryo_coprofiling.rda",
   download_url = NULL,
   envir = .GlobalEnv,
-  expected_md5 = .mm_embryo_expected_md5
+  object_name = "mm_embryo_coprofiling"
 ) {
   dir.create(dest, showWarnings = FALSE, recursive = TRUE)
   local_file <- file.path(dest, asset)
 
-  if (file.exists(local_file)) {
-    .verify_md5(local_file, expected_md5)
-  } else {
-    message("mm_embryo_coprofiling not cached; downloading...")
-
+  # Download if needed
+  if (!file.exists(local_file)) {
+    message(object_name, " not cached; downloading...")
     if (!is.null(download_url)) {
       utils::download.file(download_url, local_file, mode = "wb", quiet = TRUE)
     } else if (requireNamespace("piggyback", quietly = TRUE)) {
@@ -45,21 +39,32 @@ load_mm_embryo <- function(
       stop(
         "Need to download the dataset, but {piggyback} isn't installed and no direct URL was provided.\n",
         "Install piggyback: install.packages('piggyback')\n",
-        "Or call load_mm_embryo(download_url = 'https://github.com/CorazonJW/BARTsp/releases/download/",
-        tag, "/", asset, "')"
+        "Or call load_mm_embryo(download_url = 'https://.../mm_embryo_coprofiling.rda')"
       )
     }
-
-    .verify_md5(local_file, expected_md5)
   }
 
-  obj_names <- load(local_file, envir = envir)
-  if (!"mm_embryo_coprofiling" %in% obj_names) {
+  # Load into a temporary environment to inspect object names
+  tmp <- new.env(parent = emptyenv())
+  obj_names <- load(local_file, envir = tmp)
+
+  pick <- NULL
+  if (object_name %in% obj_names) {
+    pick <- object_name
+  } else if ("subset" %in% obj_names) {
+    pick <- "subset"
+  } else if (length(obj_names) == 1L) {
+    pick <- obj_names[[1L]]
+  }
+
+  if (is.null(pick)) {
     stop(
-      "Downloaded file did not contain an object named 'mm_embryo_coprofiling'. ",
-      "It contained: ", paste(obj_names, collapse = ", ")
+      "Downloaded file did not contain '", object_name, "'. ",
+      "It contained: ", paste(obj_names, collapse = ", "), "."
     )
   }
 
-  invisible(get("mm_embryo_coprofiling", envir = envir))
+  # Assign under the canonical name in target environment
+  assign(object_name, get(pick, envir = tmp), envir = envir)
+  invisible(get(object_name, envir = envir))
 }
