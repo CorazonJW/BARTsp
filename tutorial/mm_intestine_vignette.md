@@ -22,7 +22,8 @@ Inputs include
 
 ```{r, echo=TRUE, results='markup'}
 data("mm_small_intestine_Visium_HD")
-object <- mm_small_intestine_data
+cell_types <- c("Enterocyte_Progenitor", "Enterocyte_Immature", "Enterocyte_Mature")
+object <- subset(mm_small_intestine_data, subset = enterocyte_type %in% cell_types)
 
 expression_matrix <- object@assays$Spatial.008um@layers$counts
 colnames(expression_matrix) <- rownames(object@assays$Spatial.008um@cells)
@@ -33,7 +34,7 @@ cell_metadata$cell_type <- cell_metadata$enterocyte_type
 
 spatial_coordinates <- GetTissueCoordinates(object)
 
-obj <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types = c("Enterocyte_Progenitor", "Enterocyte_Immature", "Enterocyte_Mature"))
+obj <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types = cell_types)
 ```
 
 ## 3. Detect pseudo-temporally variable features (TVFs)
@@ -130,5 +131,5 @@ dt <- integrate_bart_result(results_geneset_up, results_geneset_down, cutoff_up 
 plot_integration_bar(dt, top_n = 10)
 
 # This function demonstrates all upstream and downsteam predictions as a single plot and highlights user-defined TRs of interst
-plot_integration_dot <- (dt, tf_highlight = TF_of_interest)
+plot_integration_dot(dt, tf_highlight = TF_of_interest)
 ```
