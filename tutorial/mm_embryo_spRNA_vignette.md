@@ -20,7 +20,7 @@ Inputs include
 4. cell_types: A vector of regions (cell types) of interest. 
 
 ```{r, echo=TRUE, results='markup'}
-E13_sp <- readRDS("~/mm_embryo_spRNA_spATAC.RDS")
+E13_sp <- load_mm_embryo()
 
 expression_matrix <- E13_sp@assays$Spatial@counts
 
@@ -96,7 +96,7 @@ results_geneset_down <- get_BART_results(bart_proj, "geneset")
 Users can highlight the top TRs predicted by BART and/or TRs of interest in visualization step. 
 
 ```{r, echo=TRUE, results='markup', fig.width=10, fig.height=8}
-TF_of_interest <- c("PAX6", "SOX9", "NEUROD2", "KLF4", "FEZF2","HES1")
+TF_of_interest <- c("PAX6", "SOX9", "NEUROD2", "KLF4", "FEZF2")
 
 # TRs at upstream
 plot_BART_results(results_geneset_up, TF_of_interest, 0.05, 6)

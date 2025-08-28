@@ -20,8 +20,7 @@ Inputs include
 4. cell_types: A vector of regions (cell types) of interest. 
 
 ```{r, echo=TRUE, results='markup'}
-E13_sp <- readRDS("~/mm_embryo_spRNA_spATAC.RDS")
-data("mm_embryo_coprofiling")
+E13_sp <- load_mm_embryo()
 
 expression_matrix <- E13_sp@assays$peaks@counts
 
@@ -82,14 +81,9 @@ Increasingly-expressed genes are used to predict TRs active at downstream in the
 
 ```{r, echo=TRUE, results='markup'}
 # Decreasingly-expressed genes (to predict Rs at upstream)
-bart_proj <- bart(name = regionset$description_up, genome = "mm10", data = regionset$up_region, type = "region")
+bart_proj <- bart(name = "Upstream", genome = "mm10", data = regionset$up_region, type = "region")
 bart_proj <- run_BART(bart_proj, type = "region")
 results_region_up <- get_BART_results(bart_proj, "region")
-
-# Increasingly-expressed genes (to predict TRs at downstream)
-bart_proj <- bart(name = regionset$description_down, genome = "mm10", data = regionset$down_region, type = "region")
-bart_proj <- run_BART(bart_proj, type = "region")
-results_region_down <- get_BART_results(bart_proj, "region")
 ```
 
 # 7. Visualize BART predicted results
@@ -97,25 +91,8 @@ results_region_down <- get_BART_results(bart_proj, "region")
 Users can highlight the top TRs predicted by BART and/or TRs of interest in visualization step. 
 
 ```{r, echo=TRUE, results='markup', fig.width=10, fig.height=8}
-TF_of_interest <- c("PAX6", "SOX9", "NEUROD2", "KLF4", "FEZF2","HES1")
+TF_of_interest <- c("PAX6", "SOX9", "NEUROD2", "KLF4", "FEZF2")
 
 # TRs at upstream
-plot_BART_results(results_geneset_up, TF_of_interest, 0.05, 6)
-
-# TRs at downstream
-plot_BART_results(results_geneset_up, TF_of_interest, 0.05, 6)
-```
-
-## 8. Integrate BART predicted results
-
-This step allows integrative analysis of upstream-active and downstream-active TRs. 
-
-```{r, echo=TRUE, results='markup', fig.width=10, fig.height=8}
-dt <- integrate_bart_result(results_geneset_up, results_geneset_down, cutoff_up = 0.05, cutoff_down = 0.05)
-
-# This function shows the top n active at upstream and downstream
-plot_integration_bar(dt, top_n = 10)
-
-# This function demonstrates all upstream and downsteam predictions as a single plot and highlights user-defined TRs of interst
-plot_integration_dot(dt, tf_highlight = TF_of_interest)
+plot_BART_results(results_region_up, TF_of_interest, 0.05, 6)
 ```

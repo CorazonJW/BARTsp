@@ -21,7 +21,7 @@ Inputs include
 4. cell_types: A vector of regions (cell types) of interest. 
 
 ```{r, echo=TRUE, results='markup'}
-subset_object <- readRDS("~/mm_small_intestine.RDS")
+data("mm_small_intestine_Visium_HD")
 
 expression_matrix <- object@assays$Spatial.008um@layers$counts
 colnames(expression_matrix) <- rownames(object@assays$Spatial.008um@cells)
