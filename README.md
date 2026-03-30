@@ -5,7 +5,7 @@ Applied to multiple datasets, BART-spatial outperformed existing methods, identi
 
 ## Installation
 
-You can install BART-spatial from GitHub:
+Before installing BART-spatial, please install BARTsc. More details about BARTsc can be seen under https://github.com/hongpan-uva/BARTsc. 
 
 ```r
 # Install BARTsc first
@@ -27,12 +27,6 @@ initialize()
 # Then install BART-spatial
 devtools::install_github("CorazonJW/BARTsp")
 ```
-
-## Features
-
-- Spatial gene expression analysis using Moran's I
-- Pseudo-time inference using Monocle3
-- BART integration for transcription factor prediction
 
 ## Usage
 
