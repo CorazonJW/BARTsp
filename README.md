@@ -37,7 +37,7 @@ Here's a basic example of how to use BARTsp:
 library(BARTsp)
 
 # Three inputs are required: (1) expression matrix; (2) cell metadata containing a column named "Cell_type"; (3) spatial coordinates
-
+cell_types <- c("cell_type_A", "cell_type_B")
 input_data <- prepare_input(expression_matrix, cell_metadata, spatial_coordinates, cell_types)
 ```
 
