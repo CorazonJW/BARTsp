@@ -46,8 +46,7 @@ input_data <- prepare_input(expression_matrix, cell_metadata, spatial_coordinate
 # For RNA mode, monocle3 is used to compute pseudo-time. 
 trajectory <- construct_trajectory(input_data, start_cell_type = "cell_type_A")
 
-# For ATAC mode, we recommand users to use ArchR to calculate pseudo-time. 
-
+# For ATAC mode, we recommand users to use ArchR to calculate pseudo-time.
 TVFs <- get_traj_features(trajectory$pseudotime, input_data, pval_cutoff = 0.05, 
                           cor_cutoff_pos = 0.1, cor_cutoff_neg = -0.1)
 ```
