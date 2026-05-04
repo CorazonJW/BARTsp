@@ -30,7 +30,7 @@ devtools::install_github("CorazonJW/BARTsp")
 
 ## Usage
 
-Please refer to [tutorial] for details. 
+Please refer to [tutorial](./tutorial) for details.
 
 ## License
 
