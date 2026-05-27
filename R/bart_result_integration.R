@@ -106,9 +106,10 @@ plot_integration_bar <- function(dt, top_n = 10) {
     theme_bw() +
     geom_vline(xintercept = top_n + 0.5, linetype = "dotted", color = "grey", linewidth = 1) +
     labs(x = NULL, y = "Rank Score") +
-    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1, family = "Arial"),
-          axis.text.y = element_text(size = 10, family = "Arial"),
-          axis.title.y = element_text(size = 12, face = "bold", family = "Arial"),
+    theme(text = element_text(family = "Arial", color = "black"),
+          axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+          axis.text.y = element_text(size = 10),
+          axis.title.y = element_text(size = 12, face = "bold"),
           legend.position = "none",
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank(),
@@ -165,9 +166,10 @@ plot_integration_dot <- function(dt, tf_highlight = NULL) {
     coord_cartesian(clip = "off") +
     theme_bw() +
     labs(x = NULL, y = "Rank Score") +
-    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
-          axis.text.y = element_text(size = 12, family = "Arial"),
-          axis.title.y = element_text(size = 16, face = "bold", family = "Arial"),
+    theme(text = element_text(family = "Arial", color = "black"),
+          axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+          axis.text.y = element_text(size = 12),
+          axis.title.y = element_text(size = 16, face = "bold"),
           legend.position = "none",
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank(),
@@ -183,7 +185,7 @@ plot_integration_dot <- function(dt, tf_highlight = NULL) {
       ggrepel::geom_label_repel(
         data = dt_hi,
         aes(x = TF_ordered, y = rank_score, label = TF),
-        size = 3, color = "black", fill = "white",
+        size = 3, family = "Arial", color = "black", fill = "white",
         box.padding = 0.3, max.overlaps = Inf
       )
   }
